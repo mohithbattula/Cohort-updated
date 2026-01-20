@@ -15,11 +15,13 @@ import MessagingHub from '../shared/MessagingHub';
 // @ts-ignore
 import RaiseTicketPage from '../shared/pages/RaiseTicketPage';
 // @ts-ignore
-import { ToastProvider } from '../manager/context/ToastContext';
+import { ToastProvider } from '../executive/context/ToastContext';
 // @ts-ignore
-import { UserProvider } from '../manager/context/UserContext';
+import { UserProvider } from '../executive/context/UserContext';
 // @ts-ignore
 import { ProjectProvider } from '../employee/context/ProjectContext';
+// @ts-ignore
+import StudentReviewPage from '../executive/pages/StudentReviewPage';
 import RoleGuard from '../shared/RoleGuard';
 import '../manager/index.css';
 
@@ -51,6 +53,7 @@ export const ManagerDashboard = () => {
                                 <Route path="announcements" element={<ModulePage title="Announcements" type="default" />} />
                                 <Route path="raise-ticket" element={<RaiseTicketPage />} />
                                 <Route path="documents" element={<ModulePage title="Project Documents" type="documents" />} />
+                                <Route path="student-review" element={<StudentReviewPage />} />
                                 <Route path="settings" element={<ModulePage title="Settings" type="default" />} />
                             </Routes>
                         </Layout>

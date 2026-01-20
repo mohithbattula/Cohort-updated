@@ -6,7 +6,7 @@ import Chatbot from '../UI/Chatbot';
 import LoginSummaryModal from '../../../shared/LoginSummaryModal';
 import AnnouncementPopup from '../../../shared/AnnouncementPopup';
 import { supabase } from '../../../../lib/supabaseClient';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../../executive/context/ToastContext';
 import { MessageProvider } from '../../../shared/context/MessageContext';
 import NotificationBanner from '../../../shared/NotificationBanner';
 

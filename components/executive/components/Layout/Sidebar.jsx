@@ -23,7 +23,8 @@ import {
     TrendingUp,
     Building2,
     FolderKanban,
-    Ticket
+    Ticket,
+    ClipboardList
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMessages } from '../../../shared/context/MessageContext';
@@ -63,6 +64,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
         { icon: MessageCircle, label: 'Messages', path: '/executive-dashboard/messages' },
         { icon: FileCheck, label: 'Policies', path: '/executive-dashboard/policies' },
         { icon: Ticket, label: 'Raise a Ticket', path: '/executive-dashboard/raise-ticket' },
+        { icon: ClipboardList, label: 'Student Review', path: '/executive-dashboard/student-review' },
     ];
 
     const projectMenuItems = [
@@ -79,7 +81,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
     let finalProjectMenuItems = projectMenuItems;
 
     if (orgName?.trim() === 'Cohort') {
-        const allowedOrg = ['Dashboard', 'Announcements', 'Org Hierarchy', 'Messages', 'Employees'];
+        const allowedOrg = ['Dashboard', 'Announcements', 'Org Hierarchy', 'Messages', 'Employees', 'Student Review'];
         finalOrgMenuItems = orgMenuItems.filter(item => allowedOrg.includes(item.label));
 
         // Rename 'Employees' to 'All Members' explicitly for this view

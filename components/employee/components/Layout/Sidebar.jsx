@@ -21,7 +21,8 @@ import {
     Check,
     ClipboardCheck,
     TrendingUp,
-    Ticket
+    Ticket,
+    Star
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useProject } from '../../context/ProjectContext';
@@ -70,6 +71,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
             { icon: ListTodo, label: 'My Tasks', path: '/student-dashboard/my-tasks' },
             { icon: BarChart2, label: 'Analytics', path: '/student-dashboard/analytics' },
             { icon: Network, label: 'Hierarchy', path: '/student-dashboard/project-hierarchy' },
+            { icon: Star, label: 'My Review', path: '/student-dashboard/my-review' },
         ],
         employee: [
             { icon: FileText, label: 'Project Documents', path: '/student-dashboard/documents' },
@@ -77,6 +79,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
             { icon: ListTodo, label: 'My Tasks', path: '/student-dashboard/my-tasks' },
             { icon: BarChart2, label: 'Analytics', path: '/student-dashboard/analytics' },
             { icon: Network, label: 'Hierarchy', path: '/student-dashboard/project-hierarchy' },
+            { icon: Star, label: 'My Review', path: '/student-dashboard/my-review' },
         ],
         team_lead: [
             { icon: FileText, label: 'Project Documents', path: '/student-dashboard/documents' },
@@ -86,6 +89,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
             { icon: TrendingUp, label: 'Performance', path: '/student-dashboard/performance' },
             { icon: BarChart2, label: 'Analytics', path: '/student-dashboard/analytics' },
             { icon: Network, label: 'Hierarchy', path: '/student-dashboard/project-hierarchy' },
+            { icon: Star, label: 'My Review', path: '/student-dashboard/my-review' },
         ],
         manager: [
             { icon: FileText, label: 'Project Documents', path: '/student-dashboard/documents' },
@@ -95,6 +99,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
             { icon: TrendingUp, label: 'Performance', path: '/student-dashboard/performance' },
             { icon: BarChart2, label: 'Analytics', path: '/student-dashboard/analytics' },
             { icon: Network, label: 'Hierarchy', path: '/student-dashboard/project-hierarchy' },
+            { icon: Star, label: 'My Review', path: '/student-dashboard/my-review' },
         ]
     };
 

@@ -23,12 +23,13 @@ import {
     FolderKanban,
     FileText,
     Check,
-    Ticket
+    Ticket,
+    ClipboardList
 } from 'lucide-react';
 import { useProject } from '../../../employee/context/ProjectContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useMessages } from '../../../shared/context/MessageContext';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../../../executive/context/UserContext';
 
 const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => {
     const navigate = useNavigate();
@@ -74,6 +75,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
         { icon: MessageCircle, label: 'Messages', path: '/manager-dashboard/messages' },
         { icon: FileCheck, label: 'Policies', path: '/manager-dashboard/policies' },
         { icon: Ticket, label: 'Raise a Ticket', path: '/manager-dashboard/raise-ticket' },
+        { icon: ClipboardList, label: 'Student Review', path: '/manager-dashboard/student-review' },
     ];
 
     // Role-based project menu configurations
@@ -118,7 +120,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
     let finalProjectMenuItems = projectMenuItems;
 
     if (orgName?.trim() === 'Cohort') {
-        const allowedOrg = ['Dashboard', 'Announcements', 'Org Hierarchy', 'Messages'];
+        const allowedOrg = ['Dashboard', 'Announcements', 'Org Hierarchy', 'Messages', 'Student Review'];
         finalOrgMenuItems = orgMenuItems.filter(item => allowedOrg.includes(item.label));
 
         // Project Section: Team members, All Project Tasks, Analytics, Project Hierarchy, Documents

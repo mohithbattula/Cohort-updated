@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Search, MessageSquare, User, FileText, ClipboardList, Receipt, File } from 'lucide-react';
-import { useToast } from '../../context/ToastContext';
+import { useToast } from '../../../executive/context/ToastContext';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../../context/UserContext';
+import { useUser } from '../../../executive/context/UserContext';
 import NotificationDropdown from '../../../shared/NotificationDropdown';
 import { supabase } from '../../../../lib/supabaseClient';
 

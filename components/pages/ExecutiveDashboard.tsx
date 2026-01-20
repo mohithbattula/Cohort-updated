@@ -25,6 +25,8 @@ import ProjectDocuments from '../employee/pages/ProjectDocuments';
 import RaiseTicketPage from '../shared/pages/RaiseTicketPage';
 // @ts-ignore
 import ExecutiveAllTasksPage from '../executive/pages/ExecutiveAllTasksPage';
+// @ts-ignore
+import StudentReviewPage from '../executive/pages/StudentReviewPage';
 import RoleGuard from '../shared/RoleGuard';
 import '../executive/index.css';
 
@@ -62,6 +64,7 @@ export function ExecutiveDashboard({ userId, orgId }: { userId: string, orgId: s
                                 <Route path="raise-ticket" element={<RaiseTicketPage />} />
                                 <Route path="settings" element={<ModulePage title="Settings" type="default" />} />
                                 <Route path="project-analytics" element={<ModulePage title="Project Analytics" type="project-analytics" />} />
+                                <Route path="student-review" element={<StudentReviewPage />} />
                                 <Route path="documents" element={<DocumentsWithToast />} />
                             </Routes>
                         </Layout>

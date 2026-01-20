@@ -5,8 +5,8 @@ import {
     CheckCircle2, AlertCircle, Timer, Plus, Star, X,
     TrendingUp, Award, Briefcase, CheckCircle
 } from 'lucide-react';
-import { useToast } from '../context/ToastContext';
-import { useUser } from '../context/UserContext';
+import { useToast } from '../../executive/context/ToastContext';
+import { useUser } from '../../executive/context/UserContext';
 import { supabase } from '../../../lib/supabaseClient';
 import NotesTile from '../../shared/NotesTile';
 

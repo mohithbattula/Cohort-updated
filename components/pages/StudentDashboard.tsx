@@ -24,6 +24,8 @@ import MyTasksPage from '../employee/pages/MyTasksPage';
 import TeamTasksPage from '../employee/pages/TeamTasksPage';
 // @ts-ignore
 import TeamPerformance from '../employee/pages/TeamPerformance';
+// @ts-ignore
+import MyReviewPage from '../employee/pages/MyReviewPage';
 import RoleGuard from '../shared/RoleGuard';
 import '../employee/index.css';
 
@@ -59,6 +61,7 @@ export const StudentDashboard = () => {
                                 <Route path="approve-leaves" element={<ModulePage title="Approve Leaves" type="leaves" />} />
                                 <Route path="manage-members" element={<ModulePage title="Manage Members" type="workforce" />} />
                                 <Route path="performance" element={<TeamPerformance />} />
+                                <Route path="my-review" element={<MyReviewPage />} />
                             </Routes>
                         </Layout>
                     </ToastProvider>

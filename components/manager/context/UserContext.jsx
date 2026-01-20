@@ -12,6 +12,7 @@ export const UserProvider = ({ children }) => {
     const [userTask, setUserTask] = useState('');
     const [lastActive, setLastActive] = useState('Now');
     const [userId, setUserId] = useState(null);
+    const [teamId, setTeamId] = useState(null);
     const [orgId, setOrgId] = useState(null);
     const [orgName, setOrgName] = useState('');
     const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ export const UserProvider = ({ children }) => {
                     // Fetch user's profile to get full_name, role, and org_id
                     const { data: profile, error } = await supabase
                         .from('profiles')
-                        .select('full_name, email, role, org_id, organizations(name)')
+                        .select('full_name, email, role, org_id, team_id, organizations(name)')
                         .eq('id', user.id)
                         .single();
 
@@ -40,6 +41,7 @@ export const UserProvider = ({ children }) => {
                         setUserName(profile.full_name || profile.email || 'User');
                         setUserRole(profile.role || 'User');
                         setOrgId(profile.org_id);
+                        setTeamId(profile.team_id);
                         const fetchedOrgName = profile.organizations?.name || (Array.isArray(profile.organizations) ? profile.organizations[0]?.name : '');
                         setOrgName(fetchedOrgName);
                     }
@@ -68,6 +70,7 @@ export const UserProvider = ({ children }) => {
             userName, setUserName,
             userRole, setUserRole,
             userId,
+            teamId,
             orgId,
             orgName,
             userStatus, setUserStatus,

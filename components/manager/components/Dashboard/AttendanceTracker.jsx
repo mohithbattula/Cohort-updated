@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Coffee, Play, Square, CheckCircle2 } from 'lucide-react';
-import { useToast } from '../../context/ToastContext';
-import { useUser } from '../../context/UserContext';
+import { useToast } from '../../../executive/context/ToastContext';
+import { useUser } from '../../../executive/context/UserContext';
 import { supabase } from '../../../../lib/supabaseClient';
 
 const AttendanceTracker = () => {
