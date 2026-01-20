@@ -157,7 +157,8 @@ const ProjectManagement = ({ addToast = () => { } }) => {
         const insertData = {
             project_id: selectedProject.id,
             user_id: userId,
-            role: selectedRole
+            role: selectedRole,
+            org_id: orgId
         };
         console.log('🔍 Adding member with data:', insertData);
 
@@ -176,7 +177,8 @@ const ProjectManagement = ({ addToast = () => { } }) => {
             const teamMemberData = {
                 team_id: selectedProject.id,
                 profile_id: userId,
-                role_in_project: selectedRole
+                role_in_project: selectedRole,
+                org_id: orgId
             };
 
             const { error: teamError } = await supabase.from('team_members').insert(teamMemberData);
@@ -449,7 +451,7 @@ const ProjectManagement = ({ addToast = () => { } }) => {
                                                     >
                                                         <option value="student">Student</option>
                                                         <option value="team_lead">Team Lead</option>
-                                                        <option value="manager">Manager</option>
+                                                        <option value="manager">Mentor</option>
                                                     </select>
                                                     <button onClick={() => removeMember(member.id)} style={{ padding: '8px', borderRadius: '8px', border: '1px solid #fee2e2', backgroundColor: '#fff', cursor: 'pointer', color: '#ef4444' }}>
                                                         <Trash2 size={16} />
@@ -554,14 +556,14 @@ const ProjectManagement = ({ addToast = () => { } }) => {
 
                                     {/* Manager Selection */}
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>Assign Project Manager</label>
+                                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, marginBottom: '8px', color: 'var(--text-primary)' }}>Assign Project Mentor</label>
                                         <div style={{ position: 'relative' }}>
                                             <select
                                                 value={wizardData.managerId}
                                                 onChange={(e) => setWizardData({ ...wizardData, managerId: e.target.value })}
                                                 style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', fontSize: '1rem', appearance: 'none', backgroundColor: 'var(--background)' }}
                                             >
-                                                <option value="">Select a Manager</option>
+                                                <option value="">Select a Mentor</option>
                                                 {allUsers.map(user => (
                                                     <option key={user.id} value={user.id}>{user.full_name}</option>
                                                 ))}
@@ -749,7 +751,7 @@ const ProjectManagement = ({ addToast = () => { } }) => {
                                 style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--border)' }}>
                                 <option value="student">Student</option>
                                 <option value="team_lead">Team Lead</option>
-                                <option value="manager">Manager</option>
+                                <option value="manager">Mentor</option>
                             </select>
                         </div>
                         <div style={{ flex: 1, overflowY: 'auto', maxHeight: '300px' }}>

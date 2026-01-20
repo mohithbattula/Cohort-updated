@@ -317,7 +317,7 @@ const ManagerTaskDashboard = ({ userRole = 'manager', userId, addToast }) => {
                 .eq('id', user.id)
                 .single();
 
-            const userName = profile?.full_name || profile?.email || 'Manager';
+            const userName = profile?.full_name || profile?.email || 'Mentor';
             const timestamp = new Date().toISOString();
 
             const resolutionEntry = `\n\n[${new Date(timestamp).toLocaleString()}] RESOLVED by ${userName}`;

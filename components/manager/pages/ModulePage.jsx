@@ -181,11 +181,22 @@ const ModulePage = ({ title, type }) => {
                             const totalTasks = totalTasksMap[emp.id] || 0;
                             const performanceRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
+                            const rawRole = projectRoleMap[emp.id] || emp.role || 'N/A';
+                            let displayRole = rawRole;
+
+                            if (rawRole.toLowerCase() === 'manager') {
+                                displayRole = 'Mentor';
+                            } else if (rawRole.toLowerCase() === 'executive') {
+                                displayRole = 'Tutor';
+                            } else {
+                                displayRole = rawRole.replace(/Team_lead/i, 'Team Lead').replace(/_/g, ' ');
+                            }
+
                             return {
                                 id: emp.id,
                                 name: emp.full_name || 'N/A',
                                 email: emp.email || 'N/A',
-                                role: projectRoleMap[emp.id] || emp.role || 'N/A',
+                                role: displayRole,
                                 dept: (projectMap[emp.id] && projectMap[emp.id].length > 0) ? projectMap[emp.id].join(', ') : 'Unassigned',
                                 status: 'Active',
                                 joinDate: emp.created_at ? new Date(emp.created_at).toLocaleDateString() : 'N/A',

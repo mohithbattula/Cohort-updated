@@ -460,7 +460,7 @@ const AllTasksView = ({ userRole = 'employee', projectRole = 'employee', userId,
                 .eq('id', user.id)
                 .eq('org_id', orgId)
                 .single();
-            const senderName = senderProfile?.full_name || (userRole === 'manager' ? 'Management' : (userRole === 'team_lead' ? 'Team Lead' : 'Task Manager'));
+            const senderName = senderProfile?.full_name || (userRole === 'manager' ? 'Mentor' : (userRole === 'team_lead' ? 'Team Lead' : 'Task Manager'));
 
             const tasksToInsert = targetAssignees.map(empId => ({
                 title: newTask.title,
@@ -709,7 +709,7 @@ const AllTasksView = ({ userRole = 'employee', projectRole = 'employee', userId,
                 .eq('org_id', orgId)
                 .single();
 
-            const userName = profile?.full_name || profile?.email || 'Manager';
+            const userName = profile?.full_name || profile?.email || 'Mentor';
             const timestamp = new Date().toISOString();
 
             // Add resolution note to issues

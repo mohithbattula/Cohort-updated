@@ -300,7 +300,7 @@ const ProjectHierarchyDemo = ({ isEditingEnabled = false }) => {
                             onChange={e => setRole(e.target.value)}
                             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                         >
-                            <option value="manager">Project Manager</option>
+                            <option value="manager">Project Mentor</option>
                             <option value="team_lead">Team Lead</option>
                             <option value="student">Student</option>
                         </select>
@@ -390,7 +390,7 @@ const ProjectHierarchyDemo = ({ isEditingEnabled = false }) => {
                             <div key={exec.id} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <NodeCard
                                     title={exec.full_name}
-                                    subtitle="Executive"
+                                    subtitle="Tutor"
                                     color="#7c3aed"
                                     onClick={() => setSelectedEmployee(exec)}
                                 />
@@ -520,7 +520,7 @@ const ProjectHierarchyDemo = ({ isEditingEnabled = false }) => {
                                     <div key={mgr.id} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                         <NodeCard
                                             title={mgr.full_name}
-                                            subtitle="Project Manager"
+                                            subtitle="Project Mentor"
                                             color="#2563eb"
                                             onClick={() => setSelectedEmployee(mgr)}
                                             showActions={isEditingEnabled}
@@ -573,7 +573,7 @@ const ProjectHierarchyDemo = ({ isEditingEnabled = false }) => {
                         </>
                     ) : (
                         <div style={{ padding: '10px', border: '1px dashed #cbd5e1', borderRadius: '8px', color: '#94a3b8', marginBottom: `${halfGap}px` }}>
-                            No Manager Assigned
+                            No Mentor Assigned
                             {/* Placeholder Down Line */}
                             <div style={{
                                 position: 'absolute',
@@ -700,7 +700,7 @@ const ProjectHierarchyDemo = ({ isEditingEnabled = false }) => {
                             <div key={exec.id} style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <NodeCard
                                     title={exec.full_name}
-                                    subtitle="Executive"
+                                    subtitle="Tutor"
                                     color="#7c3aed"
                                     onClick={() => setSelectedEmployee(exec)}
                                 />
@@ -781,7 +781,7 @@ const ProjectHierarchyDemo = ({ isEditingEnabled = false }) => {
 
                                                         <NodeCard
                                                             title={mgr.full_name}
-                                                            subtitle="Project Manager"
+                                                            subtitle="Project Mentor"
                                                             color="#2563eb"
                                                             onClick={() => setSelectedEmployee(mgr)}
                                                         />

@@ -12,7 +12,7 @@ import { supabase } from '../../../lib/supabaseClient';
 
 const DashboardHome = () => {
     const { addToast } = useToast();
-    const { userName, currentTeam, orgName } = useUser();
+    const { userName, currentTeam, orgName, orgId } = useUser();
     const navigate = useNavigate();
 
     // Helper to format date as YYYY-MM-DD for comparison (Local Time)
@@ -64,27 +64,50 @@ const DashboardHome = () => {
 
                     if (attendance) setAttendanceData(attendance);
 
-                    // 3. Fetch Team ID from profiles table
+                    // 3. Fetch Profile Data (team_id, org_id)
                     const { data: profileData } = await supabase
                         .from('profiles')
-                        .select('team_id')
+                        .select('team_id, org_id, leaves_remaining')
                         .eq('id', user.id)
                         .single();
 
                     if (profileData) {
-                        // Default balance since columns are missing in Cohort schema
-                        setLeaveBalance(3);
+                        // Default balance since columns might be missing in some schemas
+                        setLeaveBalance(profileData.leaves_remaining || 3);
                     }
 
-                    // 4. Fetch All Employees & Team Members
-                    const { data: allEmps, error: empError } = await supabase.from('profiles').select('id, full_name, team_id');
+                    // 4. Fetch All Students in the Organization
+                    const { data: allEmps, error: empError } = await supabase
+                        .from('profiles')
+                        .select('id, full_name, team_id, role')
+                        .eq('org_id', profileData?.org_id || orgId)
+                        .eq('role', 'employee'); // Consistent with "All Students" label
 
                     if (empError) console.error("Error fetching employees:", empError);
 
                     if (allEmps) {
                         setAllOrgEmployees(allEmps);
-                        if (profileData && profileData.team_id) {
+
+                        // 5. Fetch Team Members (from project_members or legacy team_id)
+                        const { data: userProjects } = await supabase
+                            .from('project_members')
+                            .select('project_id')
+                            .eq('user_id', user.id);
+
+                        const projectIds = userProjects?.map(p => p.project_id) || [];
+
+                        if (projectIds.length > 0) {
+                            const { data: projectMembers } = await supabase
+                                .from('project_members')
+                                .select('user_id')
+                                .in('project_id', projectIds);
+
+                            const memberIds = [...new Set(projectMembers?.map(m => m.user_id) || [])];
+                            setTeamMembers(allEmps.filter(e => memberIds.includes(e.id)));
+                        } else if (profileData?.team_id) {
                             setTeamMembers(allEmps.filter(e => e.team_id === profileData.team_id));
+                        } else {
+                            setTeamMembers([]);
                         }
                     }
 
@@ -233,9 +256,9 @@ const DashboardHome = () => {
                 event_time: time,
                 location,
                 message: '', // Default as dashboard modal has no message field
-                event_for: 'employee',
+                event_for: eventScope === 'team' ? 'team' : 'employee',
                 employees: selectedEventMembers,
-                teams: []
+                teams: eventScope === 'team' && profileData?.team_id ? [profileData.team_id] : []
             });
 
             if (error) throw error;

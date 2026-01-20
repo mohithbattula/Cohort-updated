@@ -562,8 +562,8 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, on
                                 }}
                             >
                                 <option value="employee">{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
-                                <option value="manager">Manager</option>
-                                <option value="executive">Executive</option>
+                                <option value="manager">Mentor</option>
+                                <option value="executive">Tutor</option>
                             </select>
                         </div>
 
@@ -667,7 +667,7 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, on
                             >
                                 <option value="employee">{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
                                 <option value="team_lead">Team Lead</option>
-                                <option value="manager">Manager</option>
+                                <option value="manager">Mentor</option>
                             </select>
                         </div>
 

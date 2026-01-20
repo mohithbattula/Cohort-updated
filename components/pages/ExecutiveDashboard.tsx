@@ -34,7 +34,7 @@ const DocumentsWithToast = () => {
     return <ProjectDocuments userRole="executive" addToast={addToast} />;
 };
 
-export const ExecutiveDashboard = () => {
+export function ExecutiveDashboard({ userId, orgId }: { userId: string, orgId: string }) {
     return (
         <RoleGuard allowedRoles={['executive', 'admin']}>
             <UserProvider>

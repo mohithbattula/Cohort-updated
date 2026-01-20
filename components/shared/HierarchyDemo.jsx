@@ -135,7 +135,7 @@ const HierarchyDemo = () => {
                     {data.full_name || 'Unknown'}
                 </p>
                 <p style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    {data.role === 'employee' ? 'Student' : (data.role || 'N/A')}
+                    {data.role === 'employee' ? 'Student' : data.role === 'manager' ? 'Mentor' : data.role === 'executive' ? 'Tutor' : (data.role || 'N/A')}
                 </p>
             </div>
         </div>
@@ -178,7 +178,7 @@ const HierarchyDemo = () => {
                             Organizational Hierarchy
                         </h2>
                         <p style={{ color: '#64748b', fontSize: '1rem' }}>
-                            Extended hierarchical structure: Executives → Managers → Team Leads → Students
+                            Extended hierarchical structure: Tutors → Mentors → Team Leads → Students
                         </p>
                     </div>
 
@@ -327,7 +327,7 @@ const HierarchyDemo = () => {
                             <div style={{ textAlign: 'center', padding: '100px', backgroundColor: 'white', borderRadius: '24px', border: '2px dashed #e2e8f0', maxWidth: '600px', margin: '0 auto' }}>
                                 <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🌐</div>
                                 <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>No Hierarchy Data Found</h3>
-                                <p style={{ color: '#64748b' }}>We couldn't find any employees with hierarchical roles (Executives, Managers, Team Leads, or Students). Please verify employee roles in the Team Members section.</p>
+                                <p style={{ color: '#64748b' }}>We couldn't find any employees with hierarchical roles (Tutors, Mentors, Team Leads, or Students). Please verify employee roles in the Team Members section.</p>
                             </div>
                         )}
                     </div>

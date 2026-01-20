@@ -536,7 +536,7 @@ const ProjectAnalytics = ({ userRole = 'manager', dashboardPrefix = '/manager-da
                                 {selectedProject?.name}
                             </h1>
                             <p style={{ color: '#64748b', marginTop: '4px' }}>
-                                Managed by {selectedProject?.manager_name}
+                                Mentored by {selectedProject?.manager_name}
                             </p>
                         </div>
                         <span style={{

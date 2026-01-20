@@ -190,7 +190,9 @@ const Header = () => {
             zIndex: 900
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{userRole ? userRole.toUpperCase() : 'DASHBOARD'}</h2>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+                    {userRole === 'executive' ? 'TUTOR' : userRole === 'manager' ? 'MENTOR' : (userRole ? userRole.toUpperCase() : 'DASHBOARD')}
+                </h2>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-lg)' }}>

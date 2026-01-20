@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { supabase } from '../../../../lib/supabaseClient';
 
 // Get chatbot API URL from environment variable
-const CHATBOT_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const CHATBOT_BASE_URL = import.meta.env.VITE_CHATBOT_API_URL || 'http://localhost:8080';
 const CHATBOT_API_URL = `${CHATBOT_BASE_URL}/chat`;
 
 const Chatbot = () => {
