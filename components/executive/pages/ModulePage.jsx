@@ -28,7 +28,7 @@ const ModulePage = ({ title, type }) => {
     const { userId, orgId, userRole, orgName } = useUser();
 
     // Determine display title
-    const displayTitle = (title === 'Employees' && orgName === 'Cohort') ? 'Cohort Members' : title;
+    const displayTitle = (title === 'Students' && orgName === 'Cohort') ? 'Cohort Members' : title;
 
     // State for leave requests
     const [leaveRequests, setLeaveRequests] = useState([]);
@@ -1029,7 +1029,12 @@ const ModulePage = ({ title, type }) => {
                     accessor: 'role',
                     render: (row) => (
                         <span style={{ textTransform: 'capitalize' }}>
-                            {orgName === 'Cohort' && (row.role?.toLowerCase() === 'employee' || !row.role) ? 'Student' : row.role}
+                            {orgName === 'Cohort' ? (
+                                row.role?.toLowerCase() === 'executive' ? 'Tutor' :
+                                    row.role?.toLowerCase() === 'manager' ? 'Mentor' :
+                                        row.role?.toLowerCase() === 'employee' || !row.role ? 'Student' :
+                                            row.role
+                            ) : row.role}
                         </span>
                     )
                 },
@@ -1039,7 +1044,7 @@ const ModulePage = ({ title, type }) => {
                     header: 'Actions', accessor: 'actions', render: (row) => (
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button
-                                onClick={() => handleAction('View Employee', row)}
+                                onClick={() => handleAction('View Student', row)}
                                 style={{
                                     padding: '6px 12px',
                                     borderRadius: '6px',
@@ -1061,7 +1066,7 @@ const ModulePage = ({ title, type }) => {
                                 View
                             </button>
                             <button
-                                onClick={() => handleAction('Edit Employee', row)}
+                                onClick={() => handleAction('Edit Student', row)}
                                 style={{
                                     padding: '6px 12px',
                                     borderRadius: '6px',
@@ -1089,7 +1094,7 @@ const ModulePage = ({ title, type }) => {
         },
         status: {
             columns: [
-                { header: 'Employee', accessor: 'name' },
+                { header: 'Student', accessor: 'name' },
                 { header: 'Department', accessor: 'department_display' },
                 { header: 'Project', accessor: 'dept' },
                 {
@@ -1195,7 +1200,7 @@ const ModulePage = ({ title, type }) => {
         },
         leaves: {
             columns: [
-                { header: 'Employee', accessor: 'name' },
+                { header: 'Student', accessor: 'name' },
                 { header: 'Type', accessor: 'type' },
                 { header: 'Duration', accessor: 'duration' },
                 { header: 'Dates', accessor: 'dates' },
@@ -1310,7 +1315,7 @@ const ModulePage = ({ title, type }) => {
         },
         payroll: {
             columns: [
-                { header: 'Employee', accessor: 'name' },
+                { header: 'Student', accessor: 'name' },
                 { header: 'Month', accessor: 'month' },
                 { header: 'Net Salary', accessor: 'salary' },
                 {

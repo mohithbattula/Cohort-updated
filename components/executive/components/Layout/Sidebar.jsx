@@ -52,8 +52,8 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
     // Organization-level menu items (Org Manager stuff)
     const orgMenuItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/executive-dashboard/dashboard' },
-        { icon: Users, label: 'Employees', path: '/executive-dashboard/employees' },
-        { icon: UserCheck, label: 'Employee Status', path: '/executive-dashboard/employee-status' },
+        { icon: Users, label: 'Students', path: '/executive-dashboard/students' },
+        { icon: UserCheck, label: 'Student Status', path: '/executive-dashboard/student-status' },
         { icon: CalendarOff, label: 'Leave Requests', path: '/executive-dashboard/leaves' },
         { icon: DollarSign, label: 'Payroll', path: '/executive-dashboard/payroll' },
         { icon: Receipt, label: 'Payslips', path: '/executive-dashboard/payslips' },
@@ -81,12 +81,12 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
     let finalProjectMenuItems = projectMenuItems;
 
     if (orgName?.trim() === 'Cohort') {
-        const allowedOrg = ['Dashboard', 'Announcements', 'Org Hierarchy', 'Messages', 'Employees', 'Student Review'];
+        const allowedOrg = ['Dashboard', 'Announcements', 'Org Hierarchy', 'Messages', 'Students', 'Student Review'];
         finalOrgMenuItems = orgMenuItems.filter(item => allowedOrg.includes(item.label));
 
-        // Rename 'Employees' to 'All Members' explicitly for this view
+        // Rename 'Students' to 'All Members' explicitly for this view
         finalOrgMenuItems = finalOrgMenuItems.map(item =>
-            item.label === 'Employees' ? { ...item, label: 'All Members' } : item
+            item.label === 'Students' ? { ...item, label: 'All Members' } : item
         );
 
         // For Project Section in Cohort: Projects, Tasks, Analytics, Proj Hierarchy

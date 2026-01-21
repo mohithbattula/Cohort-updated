@@ -9,6 +9,15 @@ import { useUser } from '../context/UserContext';
 import AttendanceTracker from '../components/Dashboard/AttendanceTracker';
 import NotesTile from '../../shared/NotesTile';
 import { supabase } from '../../../lib/supabaseClient';
+import { Confetti } from '@/registry/magicui/confetti';
+
+const SOFT_SKILL_TRAITS = [
+    "Accountability", "Learnability", "Abstract Thinking", "Curiosity", "Second-Order Thinking",
+    "Compliance", "Ambitious", "Communication", "English", "First-Principle Thinking"
+];
+
+
+import SoftSkillsSection from '../components/SoftSkillsSection';
 
 const DashboardHome = () => {
     const { addToast } = useToast();
@@ -45,6 +54,11 @@ const DashboardHome = () => {
     const [selectedEventMembers, setSelectedEventMembers] = useState([]);
     const [allOrgEmployees, setAllOrgEmployees] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
+
+    const [softSkillsStats, setSoftSkillsStats] = useState({
+        overall: 0,
+        traits: SOFT_SKILL_TRAITS.map(t => ({ name: t, score: 0 }))
+    });
 
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -170,6 +184,47 @@ const DashboardHome = () => {
                         return (a.time || '').localeCompare(b.time || '');
                     });
                     setTimeline(combinedEvents);
+
+                    // 6. Fetch Soft Skills Reviews
+                    const { data: reviews } = await supabase
+                        .from('student_task_reviews')
+                        .select('soft_skill_traits')
+                        .eq('student_id', user.id);
+
+                    if (reviews && reviews.length > 0) {
+                        const traitSums = {};
+                        const traitCounts = {};
+
+                        SOFT_SKILL_TRAITS.forEach(trait => {
+                            traitSums[trait] = 0;
+                            traitCounts[trait] = 0;
+                        });
+
+                        reviews.forEach(review => {
+                            const traits = review.soft_skill_traits || {};
+                            Object.entries(traits).forEach(([trait, score]) => {
+                                if (typeof score === 'number') {
+                                    traitSums[trait] = (traitSums[trait] || 0) + score;
+                                    traitCounts[trait] = (traitCounts[trait] || 0) + 1;
+                                }
+                            });
+                        });
+
+                        const calculatedTraits = SOFT_SKILL_TRAITS.map(trait => ({
+                            name: trait,
+                            score: traitCounts[trait] > 0 ? traitSums[trait] / traitCounts[trait] : 0
+                        }));
+
+                        const totalSum = calculatedTraits.reduce((sum, t) => sum + t.score, 0);
+                        const overallParams = calculatedTraits.filter(t => t.score > 0).length; // Avoid dividing by 0 if unused traits
+                        // Or just average of all traits typically
+                        const overall = calculatedTraits.length > 0 ? totalSum / calculatedTraits.length : 0;
+
+                        setSoftSkillsStats({
+                            overall: overall,
+                            traits: calculatedTraits
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
@@ -203,6 +258,10 @@ const DashboardHome = () => {
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'payroll' }, (payload) => {
                 console.log('Realtime Payroll Update:', payload);
+                setRefreshTrigger(prev => prev + 1);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'student_task_reviews' }, (payload) => {
+                console.log('Realtime Review Update:', payload);
                 setRefreshTrigger(prev => prev + 1);
             })
             .subscribe();
@@ -662,9 +721,13 @@ const DashboardHome = () => {
 
 
 
+
+            {/* Soft Skills Section */}
+            <SoftSkillsSection
+                softSkillsAverageScore={softSkillsStats.overall}
+                softSkillsTraits={softSkillsStats.traits}
+            />
         </div>
-
-
     );
 };
 

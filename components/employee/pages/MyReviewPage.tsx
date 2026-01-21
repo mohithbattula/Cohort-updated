@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ClipboardList, Star, TrendingUp, Award, ChevronRight, Loader2 } from 'lucide-react';
 import { useUser } from '../context/UserContext';
+import { supabase } from '@/lib/supabaseClient';
 import { getStudentTasksWithReviews } from '@/services/reviews/studentTaskReviews';
-import { getStudentSoftSkills } from '@/services/reviews/studentSoftSkillsReviews';
+import { Confetti, type ConfettiRef } from '@/registry/magicui/confetti';
 
 const SOFT_SKILL_TRAITS = [
     "Accountability", "Learnability", "Abstract Thinking", "Curiosity", "Second-Order Thinking",
     "Compliance", "Ambitious", "Communication", "English", "First-Principle Thinking"
 ];
 
+import SoftSkillsSection from '../components/SoftSkillsSection';
+
 const MyReviewPage = () => {
     const { userId } = useUser();
     const [selectedTab, setSelectedTab] = useState('Score');
     const [tasks, setTasks] = useState<any[]>([]);
-    const [softSkills, setSoftSkills] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -23,9 +26,6 @@ const MyReviewPage = () => {
             try {
                 const tasksData = await getStudentTasksWithReviews(userId);
                 setTasks(tasksData || []);
-
-                const softSkillsData = await getStudentSoftSkills(userId);
-                setSoftSkills(softSkillsData);
             } catch (error) {
                 console.error('Error fetching review data:', error);
             } finally {
@@ -34,7 +34,22 @@ const MyReviewPage = () => {
         };
 
         fetchData();
-    }, [userId]);
+    }, [userId, refreshTrigger]);
+
+    // REAL-TIME SUBSCRIPTION
+    useEffect(() => {
+        const channel = supabase
+            .channel('student-review-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'student_task_reviews' }, (payload) => {
+                console.log('Realtime Review Update:', payload);
+                setRefreshTrigger(prev => prev + 1);
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
 
     const tabs = [
         { id: 'Score', icon: <Star size={24} />, color: '#f59e0b', label: 'Score' },
@@ -53,64 +68,39 @@ const MyReviewPage = () => {
 
     const renderContent = () => {
         if (selectedTab === 'Soft Skills') {
-            const reviews = Array.isArray(softSkills) ? softSkills : (softSkills ? [softSkills] : []);
+            const taskReviews = tasks.flatMap(t => t.student_task_reviews || []);
 
-            if (reviews.length === 0) {
-                return (
-                    <div style={{ backgroundColor: '#fff', borderRadius: '24px', padding: '40px', textAlign: 'center', border: '1px solid #e2e8f0' }}>
-                        <div className="text-gray-400 italic">No soft skills assessment available yet.</div>
-                    </div>
-                );
-            }
+            const traitSums: Record<string, number> = {};
+            const traitCounts: Record<string, number> = {};
+
+            SOFT_SKILL_TRAITS.forEach(trait => {
+                traitSums[trait] = 0;
+                traitCounts[trait] = 0;
+            });
+
+            taskReviews.forEach((review: any) => {
+                const traits = review.soft_skill_traits || {};
+                Object.entries(traits).forEach(([trait, score]) => {
+                    if (typeof score === 'number') {
+                        traitSums[trait] = (traitSums[trait] || 0) + score;
+                        traitCounts[trait] = (traitCounts[trait] || 0) + 1;
+                    }
+                });
+            });
+
+            const calculatedTraits = SOFT_SKILL_TRAITS.map(trait => ({
+                name: trait,
+                score: traitCounts[trait] > 0 ? traitSums[trait] / traitCounts[trait] : 0
+            }));
+
+            const totalSum = calculatedTraits.reduce((sum, t) => sum + t.score, 0);
+            const overallScore = calculatedTraits.length > 0 ? totalSum / calculatedTraits.length : 0;
 
             return (
-                <div className="flex flex-col gap-8">
-                    {reviews.map((review: any, idx: number) => (
-                        <div key={idx} style={{ backgroundColor: '#fff', borderRadius: '24px', padding: '32px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-                            <div className="flex flex-col md:flex-row gap-12 mb-8">
-                                <div className="text-center min-w-[200px]">
-                                    <div style={{ width: '120px', height: '120px', borderRadius: '50%', border: '8px solid #8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                                        <span style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#8b5cf6' }}>
-                                            {review.score ?? 'N/A'}<span style={{ fontSize: '1rem', color: '#94a3b8' }}>/10</span>
-                                        </span>
-                                    </div>
-                                    <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#1e293b' }}>Overall Soft Skills</h3>
-                                    <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Average of all traits</p>
-
-                                    <div className="mt-4 inline-block">
-                                        <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#1e293b', padding: '6px 16px', backgroundColor: '#f3e8ff', borderRadius: '20px', color: '#7e22ce' }}>
-                                            By {review.reviewer_role === 'executive' ? 'Executive' : 'Manager'}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="flex-1">
-                                    <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '12px' }}>Overall Performance Notes</h4>
-                                    <div style={{ color: '#475569', lineHeight: '1.6', fontSize: '1.1rem', padding: '20px', backgroundColor: '#f8fafc', borderRadius: '16px', border: '1px solid #f1f5f9', whiteSpace: 'pre-wrap', minHeight: '100px' }}>
-                                        {review.notes || 'No notes provided yet.'}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Traits Grid */}
-                            <div>
-                                <h4 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '16px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px' }}>Trait Breakdown</h4>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                                    {SOFT_SKILL_TRAITS.map(trait => (
-                                        <div key={trait} style={{
-                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                            padding: '12px 16px', borderRadius: '12px', border: '1px solid #f1f5f9', backgroundColor: '#fff'
-                                        }}>
-                                            <span style={{ fontWeight: '500', color: '#475569' }}>{trait}</span>
-                                            <span style={{ fontWeight: 'bold', color: (review.trait_scores?.[trait] || 0) >= 8 ? '#10b981' : (review.trait_scores?.[trait] || 0) >= 6 ? '#f59e0b' : '#ef4444' }}>
-                                                {review.trait_scores?.[trait] !== undefined ? review.trait_scores[trait] : '-'}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <SoftSkillsSection
+                    softSkillsAverageScore={overallScore}
+                    softSkillsTraits={calculatedTraits}
+                />
             );
         }
 
@@ -143,7 +133,7 @@ const MyReviewPage = () => {
                             // Determine reviewer label
                             let givenBy = '--';
                             if (review?.reviewer_role) {
-                                givenBy = review.reviewer_role === 'executive' ? 'Executive' : 'Manager';
+                                givenBy = review.reviewer_role === 'executive' ? 'Tutor' : 'Mentor';
                             }
 
                             // Calculate display value based on tab
@@ -167,8 +157,8 @@ const MyReviewPage = () => {
                                                 borderRadius: '20px',
                                                 fontSize: '0.75rem',
                                                 fontWeight: 'bold',
-                                                backgroundColor: givenBy === 'Executive' ? '#f3e8ff' : '#e0f2fe',
-                                                color: givenBy === 'Executive' ? '#7e22ce' : '#0369a1',
+                                                backgroundColor: givenBy === 'Tutor' ? '#f3e8ff' : '#e0f2fe',
+                                                color: givenBy === 'Tutor' ? '#7e22ce' : '#0369a1',
                                                 textTransform: 'capitalize'
                                             }}>
                                                 {givenBy}

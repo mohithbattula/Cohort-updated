@@ -65,7 +65,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
     const orgMenuItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/manager-dashboard/dashboard' },
         { icon: ListTodo, label: 'All Tasks', path: '/manager-dashboard/global-tasks' },
-        { icon: UserCheck, label: 'Employee Status', path: '/manager-dashboard/employee-status' },
+        { icon: UserCheck, label: 'Student Status', path: '/manager-dashboard/student-status' },
         { icon: CalendarOff, label: 'Leave Requests', path: '/manager-dashboard/leaves' },
         { icon: CalendarOff, label: 'My Leaves', path: '/manager-dashboard/my-leaves' },
         { icon: DollarSign, label: 'Payroll', path: '/manager-dashboard/payroll' },
@@ -81,21 +81,21 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
     // Role-based project menu configurations
     const projectMenusByRole = {
         consultant: [
-            { icon: Users, label: 'Team Members', path: '/manager-dashboard/employees' },
+            { icon: Users, label: 'Students', path: '/manager-dashboard/students' },
             { icon: FileText, label: 'Project Documents', path: '/manager-dashboard/documents' },
             { icon: User, label: 'My Tasks', path: '/manager-dashboard/personal-tasks' },
             { icon: BarChart2, label: 'Team Performance', path: '/manager-dashboard/analytics' },
             { icon: Network, label: 'Hierarchy', path: '/manager-dashboard/project-hierarchy' },
         ],
         employee: [
-            { icon: Users, label: 'Team Members', path: '/manager-dashboard/employees' },
+            { icon: Users, label: 'Students', path: '/manager-dashboard/students' },
             { icon: FileText, label: 'Project Documents', path: '/manager-dashboard/documents' },
             { icon: User, label: 'My Tasks', path: '/manager-dashboard/personal-tasks' },
             { icon: BarChart2, label: 'Team Performance', path: '/manager-dashboard/analytics' },
             { icon: Network, label: 'Hierarchy', path: '/manager-dashboard/project-hierarchy' },
         ],
         team_lead: [
-            { icon: Users, label: 'Team Members', path: '/manager-dashboard/employees' },
+            { icon: Users, label: 'Students', path: '/manager-dashboard/students' },
             { icon: ListTodo, label: 'All Project Tasks', path: '/manager-dashboard/tasks' },
             { icon: User, label: 'My Tasks', path: '/manager-dashboard/personal-tasks' },
             { icon: BarChart2, label: 'Team Performance', path: '/manager-dashboard/analytics' },
@@ -103,7 +103,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
             { icon: FileText, label: 'Project Documents', path: '/manager-dashboard/documents' },
         ],
         manager: [
-            { icon: Users, label: 'Team Members', path: '/manager-dashboard/employees' },
+            { icon: Users, label: 'Students', path: '/manager-dashboard/students' },
             { icon: ListTodo, label: 'All Project Tasks', path: '/manager-dashboard/tasks' },
             { icon: User, label: 'My Tasks', path: '/manager-dashboard/personal-tasks' },
             { icon: BarChart2, label: 'Team Performance', path: '/manager-dashboard/analytics' },
@@ -124,7 +124,7 @@ const Sidebar = ({ isCollapsed, toggleSidebar, onMouseEnter, onMouseLeave }) => 
         finalOrgMenuItems = orgMenuItems.filter(item => allowedOrg.includes(item.label));
 
         // Project Section: Team members, All Project Tasks, Analytics, Project Hierarchy, Documents
-        const allowedProject = ['Team Members', 'All Project Tasks', 'Team Performance', 'Project Hierarchy', 'Documents', 'Project Documents'];
+        const allowedProject = ['Students', 'All Project Tasks', 'Team Performance', 'Project Hierarchy', 'Documents', 'Project Documents'];
         finalProjectMenuItems = projectMenuItems.filter(item => allowedProject.includes(item.label));
     }
 

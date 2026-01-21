@@ -48,10 +48,10 @@ export function ExecutiveDashboard({ userId, orgId }: { userId: string, orgId: s
                                 <Route path="dashboard" element={<DashboardHome />} />
                                 <Route path="analytics" element={<ModulePage title="Analytics" type="analytics" />} />
                                 <Route path="projects" element={<ProjectManagement />} />
-                                <Route path="employees" element={<ModulePage title="Employees" type="workforce" />} />
+                                <Route path="students" element={<ModulePage title="Students" type="workforce" />} />
                                 <Route path="tasks" element={<ExecutiveAllTasksPage />} />
                                 <Route path="leaves" element={<ModulePage title="Leave Requests" type="leaves" />} />
-                                <Route path="employee-status" element={<ModulePage title="Employee Status" type="status" />} />
+                                <Route path="student-status" element={<ModulePage title="Student Status" type="status" />} />
                                 <Route path="payslips" element={<ModulePage title="Payslips" type="payroll" />} />
                                 <Route path="policies" element={<ModulePage title="Policies" type="policies" />} />
                                 <Route path="payroll" element={<ModulePage title="Payroll" type="payroll-generation" />} />

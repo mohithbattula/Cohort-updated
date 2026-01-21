@@ -40,7 +40,7 @@ const Header = () => {
             const query = searchQuery.toLowerCase();
             const results = [];
 
-            // 1. Search Employees (Profiles)
+            // 1. Search Students (Profiles)
             const { data: profiles } = await supabase
                 .from('profiles')
                 .select('id, full_name, role, email')
@@ -51,10 +51,10 @@ const Header = () => {
                 profiles.forEach(p => {
                     results.push({
                         id: `emp-${p.id}`,
-                        type: 'Employee',
+                        type: 'Student',
                         title: p.full_name,
-                        subtitle: p.role || 'Staff',
-                        path: '/executive-dashboard/employees',
+                        subtitle: p.role || 'Member',
+                        path: '/executive-dashboard/students',
                         icon: User
                     });
                 });
@@ -191,7 +191,11 @@ const Header = () => {
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+<<<<<<< HEAD
                     {userRole === 'executive' ? 'TUTOR' : userRole === 'manager' ? 'MENTOR' : (userRole ? userRole.toUpperCase() : 'DASHBOARD')}
+=======
+                    {userRole === 'executive' ? 'TUTOR' : (userRole ? userRole.toUpperCase() : 'DASHBOARD')}
+>>>>>>> ec6337d (New changes on perfromance reviews)
                 </h2>
             </div>
 
@@ -200,7 +204,7 @@ const Header = () => {
                     <Search size={20} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                     <input
                         type="text"
-                        placeholder="Search employees, tasks, logs..."
+                        placeholder="Search students, tasks, logs..."
                         value={searchQuery}
                         onChange={handleSearch}
                         onFocus={() => searchQuery && setShowResults(true)}

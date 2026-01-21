@@ -344,7 +344,7 @@ const DashboardHome = () => {
                     {getGreeting()}, <span style={{ color: 'var(--accent)' }}>{userName}</span>
                 </h1>
                 <p style={{ color: '#64748b', fontSize: '1rem' }}>
-                    Wish you a good and productive day. {employeeStats.active} employees active today. You have {filteredTimeline.length} events on {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.
+                    Wish you a good and productive day. {employeeStats.active} students active today. You have {filteredTimeline.length} events on {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.
                 </p>
             </div>
 
@@ -357,9 +357,9 @@ const DashboardHome = () => {
                     {/* Top Row Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        {/* Employees Card (Yellow) */}
+                        {/* Students Card (Yellow) */}
                         <div
-                            onClick={() => navigate('/executive-dashboard/employee-status')}
+                            onClick={() => navigate('/executive-dashboard/student-status')}
                             style={{
                                 backgroundColor: '#fef08a',
                                 borderRadius: '24px',
@@ -377,7 +377,7 @@ const DashboardHome = () => {
                             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                         >
                             <div>
-                                <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#854d0e' }}>Employees:</h3>
+                                <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: '#854d0e' }}>Students:</h3>
                             </div>
 
                             <div style={{ display: 'flex', gap: '32px', marginTop: '16px' }}>
@@ -690,7 +690,7 @@ const DashboardHome = () => {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
                     <div style={{ backgroundColor: '#fff', padding: '32px', borderRadius: '24px', width: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Add Employee</h3>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Add Student</h3>
                             <button onClick={() => setShowAddEmployeeModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><X size={24} /></button>
                         </div>
                         <form onSubmit={handleAddEmployee} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -701,7 +701,7 @@ const DashboardHome = () => {
                                 <option>Design</option>
                                 <option>Product</option>
                             </select>
-                            <button type="submit" style={{ backgroundColor: '#000', color: '#fff', padding: '12px', borderRadius: '12px', fontWeight: 'bold', border: 'none', cursor: 'pointer', marginTop: '8px' }}>Add Employee</button>
+                            <button type="submit" style={{ backgroundColor: '#000', color: '#fff', padding: '12px', borderRadius: '12px', fontWeight: 'bold', border: 'none', cursor: 'pointer', marginTop: '8px' }}>Add Student</button>
                         </form>
                     </div>
                 </div>
@@ -729,7 +729,7 @@ const DashboardHome = () => {
                                             checked={eventScope === 'all'}
                                             onChange={() => setEventScope('all')}
                                         />
-                                        All Employees
+                                        All Students
                                     </label>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                         <input
@@ -749,7 +749,7 @@ const DashboardHome = () => {
                                             checked={eventScope === 'employee'}
                                             onChange={() => setEventScope('employee')}
                                         />
-                                        Specific Employee(s)
+                                        Specific Student(s)
                                     </label>
                                 </div>
                             </div>
@@ -793,7 +793,7 @@ const DashboardHome = () => {
                                             />
                                             {emp.full_name}
                                         </label>
-                                    )) : <p style={{ color: '#94a3b8', fontSize: '0.9rem', padding: '4px' }}>No employees available</p>}
+                                    )) : <p style={{ color: '#94a3b8', fontSize: '0.9rem', padding: '4px' }}>No students available</p>}
                                 </div>
                             )}
 
