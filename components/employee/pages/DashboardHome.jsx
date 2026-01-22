@@ -17,7 +17,7 @@ const SOFT_SKILL_TRAITS = [
 ];
 
 
-import SoftSkillsSection from '../components/SoftSkillsSection';
+
 
 const DashboardHome = () => {
     const { addToast } = useToast();
@@ -722,11 +722,7 @@ const DashboardHome = () => {
 
 
 
-            {/* Soft Skills Section */}
-            <SoftSkillsSection
-                softSkillsAverageScore={softSkillsStats.overall}
-                softSkillsTraits={softSkillsStats.traits}
-            />
+
         </div>
     );
 };
