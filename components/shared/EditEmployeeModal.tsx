@@ -64,7 +64,7 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, on
             setFormData({
                 full_name: employee.name || '',
                 email: employee.email || '',
-                role: employee.role || 'employee',
+                role: (orgName === 'Cohort' && employee.role === 'employee') ? 'student' : (employee.role || (orgName === 'Cohort' ? 'student' : 'employee')),
                 job_title: '', // Will be updated by fetchEmployeeDepartment
                 employment_type: 'full_time', // Will be updated
                 department_id: '', // Will be updated by fetchEmployeeDepartment
@@ -77,6 +77,7 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, on
                 effective_from: new Date().toISOString().split('T')[0],
                 joinDate: '',
             });
+            setProjectRole(orgName === 'Cohort' ? 'student' : 'employee');
         }
     }, [isOpen, employee, orgId]);
 
@@ -258,11 +259,14 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, on
                 join_date: formData.joinDate,
             });
 
+            // Ensure role is mapped correctly for DB constraint
+            const dbRole = (formData.role && formData.role.toLowerCase() === 'student') ? 'employee' : formData.role;
+
             const { error: updateError } = await supabase
                 .from('profiles')
                 .update({
                     full_name: formData.full_name,
-                    role: formData.role,
+                    role: dbRole,
                 })
                 .eq('id', employee.id)
                 .eq('org_id', orgId);
@@ -439,6 +443,97 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, on
         }
     };
 
+    // Deleting Employee Handler
+    // Deleting Employee Handler
+    const handleDelete = async () => {
+        if (!window.confirm(`Are you sure you want to delete ${formData.full_name}? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+            console.log('Starting deletion process for:', employee.id);
+
+            // 1. Delete Notifications (Receiver or Sender)
+            const { error: notifError } = await supabase
+                .from('notifications')
+                .delete()
+                .or(`receiver_id.eq.${employee.id},sender_id.eq.${employee.id}`);
+
+            if (notifError) console.error('Error clearing notifications:', notifError);
+
+            // 2. Delete Employee Finance Records
+            const { error: financeError } = await supabase
+                .from('employee_finance')
+                .delete()
+                .eq('employee_id', employee.id);
+
+            if (financeError) console.error('Error clearing finance records:', financeError);
+
+            // 3. Delete Attendance
+            const { error: attendanceError } = await supabase
+                .from('attendance')
+                .delete()
+                .eq('employee_id', employee.id);
+
+            if (attendanceError) console.error('Error clearing attendance:', attendanceError);
+
+            // 4. Delete Leaves
+            const { error: leaveError } = await supabase
+                .from('leaves')
+                .delete()
+                .eq('employee_id', employee.id);
+
+            if (leaveError) console.error('Error clearing leaves:', leaveError);
+
+            // 5. Unassign Tasks (Assigned To or Assigned By)
+            // Note: We update to NULL instead of deleting to preserve task history
+            const { error: taskError1 } = await supabase
+                .from('tasks')
+                .update({ assigned_to: null })
+                .eq('assigned_to', employee.id);
+
+            if (taskError1) console.error('Error unassigning tasks (to):', taskError1);
+
+            const { error: taskError2 } = await supabase
+                .from('tasks')
+                .update({ assigned_by: null })
+                .eq('assigned_by', employee.id);
+
+            if (taskError2) console.error('Error unassigning tasks (by):', taskError2);
+
+            // 6. Delete project_members (Explicitly, just in case cascade fails or isn't set)
+            const { error: memberError } = await supabase
+                .from('project_members')
+                .delete()
+                .eq('user_id', employee.id);
+
+            if (memberError) console.error('Error clearing project memberships:', memberError);
+
+
+            // 7. Finally, Delete Profile
+            const { error: deleteError } = await supabase
+                .from('profiles')
+                .delete()
+                .eq('id', employee.id)
+                .eq('org_id', orgId);
+
+            if (deleteError) {
+                console.error('Error deleting employee profile:', deleteError);
+                throw new Error(deleteError.message || 'Failed to delete employee profile');
+            }
+
+            console.log('Employee deleted successfully');
+            onSuccess();
+            onClose();
+        } catch (err: any) {
+            setError(err.message || 'An error occurred while deleting the employee');
+            console.error('Delete error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (!isOpen || !employee) return null;
 
     return (
@@ -561,7 +656,7 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, on
                                     color: 'var(--text-primary)',
                                 }}
                             >
-                                <option value="employee">{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
+                                <option value={orgName === 'Cohort' ? 'student' : 'employee'}>{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
                                 <option value="manager">Mentor</option>
                                 <option value="executive">Tutor</option>
                             </select>
@@ -665,7 +760,7 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, on
                                     color: 'var(--text-primary)',
                                 }}
                             >
-                                <option value="employee">{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
+                                <option value={orgName === 'Cohort' ? 'student' : 'employee'}>{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
                                 <option value="team_lead">Team Lead</option>
                                 <option value="manager">Mentor</option>
                             </select>
@@ -983,6 +1078,24 @@ export const EditEmployeeModal: React.FC<EditEmployeeModalProps> = ({ isOpen, on
                             >
                                 Cancel
                             </button>
+                            {(currentUserRole === 'executive' || currentUserRole === 'manager') && (
+                                <button
+                                    type="button"
+                                    onClick={handleDelete}
+                                    style={{
+                                        flex: 1,
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        fontWeight: 600,
+                                        border: '1px solid #fee2e2',
+                                        backgroundColor: '#fee2e2',
+                                        color: '#991b1b',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Delete
+                                </button>
+                            )}
                             <button
                                 type="submit"
                                 disabled={loading}

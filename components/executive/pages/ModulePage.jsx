@@ -911,12 +911,12 @@ const ModulePage = ({ title, type }) => {
                 console.error('Error updating leave request:', error);
                 addToast(`Failed to ${action.toLowerCase()} leave request`, 'error');
             }
-        } else if (action === 'View Employee') {
+        } else if (action === 'View Employee' || action === 'View Student') {
             setSelectedEmployee(item);
             setShowEmployeeModal(true);
             // Fetch employee salary
             fetchEmployeeSalary(item.id);
-        } else if (action === 'Edit Employee') {
+        } else if (action === 'Edit Employee' || action === 'Edit Student') {
             setSelectedEmployeeForEdit(item);
             setShowEditEmployeeModal(true);
         } else if (action === 'View Candidate') {

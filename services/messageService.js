@@ -209,9 +209,11 @@ export const sendMessage = async (conversationId, userId, content, files = [], r
         if (messageError) throw messageError;
 
         // Upload attachments if any
+        let uploadedAttachments = [];
         if (files && files.length > 0) {
             for (const file of files) {
-                await uploadAttachment(file, conversationId, message.id);
+                const attachment = await uploadAttachment(file, conversationId, message.id);
+                uploadedAttachments.push(attachment);
             }
         }
 
@@ -247,7 +249,7 @@ export const sendMessage = async (conversationId, userId, content, files = [], r
             }
         }
 
-        return message;
+        return { ...message, attachments: uploadedAttachments };
     } catch (error) {
         console.error('Error sending message:', error);
         throw error;
@@ -706,3 +708,457 @@ export const votePoll = async (pollOptionId, userId) => {
         throw error;
     }
 };
+
+// ============================================
+// COHORT MESSAGING MODULE - Extended Functions
+// ============================================
+
+/**
+ * Add a reaction to a message
+ * @param {string} messageId - ID of the message
+ * @param {string} userId - ID of the user
+ * @param {string} emoji - Emoji to add
+ * @returns {Promise<Object>} Created reaction
+ */
+export const addReaction = async (messageId, userId, emoji) => {
+    try {
+        const { data, error } = await supabase
+            .from('message_reactions')
+            .insert({
+                message_id: messageId,
+                user_id: userId,
+                emoji: emoji
+            })
+            .select()
+            .single();
+
+        if (error) {
+            // If duplicate, that's okay - user already reacted with this emoji
+            if (error.code === '23505') {
+                return { alreadyExists: true };
+            }
+            throw error;
+        }
+        return data;
+    } catch (error) {
+        console.error('Error adding reaction:', error);
+        throw error;
+    }
+};
+
+/**
+ * Remove a reaction from a message
+ * @param {string} messageId - ID of the message
+ * @param {string} userId - ID of the user
+ * @param {string} emoji - Emoji to remove
+ * @returns {Promise<void>}
+ */
+export const removeReaction = async (messageId, userId, emoji) => {
+    try {
+        const { error } = await supabase
+            .from('message_reactions')
+            .delete()
+            .eq('message_id', messageId)
+            .eq('user_id', userId)
+            .eq('emoji', emoji);
+
+        if (error) throw error;
+    } catch (error) {
+        console.error('Error removing reaction:', error);
+        throw error;
+    }
+};
+
+/**
+ * Get all reactions for a message, grouped by emoji
+ * @param {string} messageId - ID of the message
+ * @returns {Promise<Object>} Grouped reactions { emoji: [users] }
+ */
+export const getMessageReactions = async (messageId) => {
+    try {
+        const { data, error } = await supabase
+            .from('message_reactions')
+            .select(`
+                emoji,
+                user_id,
+                profiles:user_id(full_name, avatar_url)
+            `)
+            .eq('message_id', messageId);
+
+        if (error) throw error;
+
+        // Group by emoji
+        const grouped = {};
+        data?.forEach(reaction => {
+            if (!grouped[reaction.emoji]) {
+                grouped[reaction.emoji] = [];
+            }
+            grouped[reaction.emoji].push({
+                userId: reaction.user_id,
+                name: reaction.profiles?.full_name || 'User',
+                avatar: reaction.profiles?.avatar_url
+            });
+        });
+
+        return grouped;
+    } catch (error) {
+        console.error('Error getting reactions:', error);
+        return {};
+    }
+};
+
+/**
+ * Delete message for the current user only (soft delete)
+ * @param {string} messageId - ID of the message
+ * @param {string} userId - ID of the user
+ * @returns {Promise<void>}
+ */
+export const deleteForMe = async (messageId, userId) => {
+    try {
+        // Add user to deleted_for array
+        const { data: message } = await supabase
+            .from('messages')
+            .select('deleted_for')
+            .eq('id', messageId)
+            .single();
+
+        const currentDeletedFor = message?.deleted_for || [];
+        if (!currentDeletedFor.includes(userId)) {
+            currentDeletedFor.push(userId);
+        }
+
+        const { error } = await supabase
+            .from('messages')
+            .update({ deleted_for: currentDeletedFor })
+            .eq('id', messageId);
+
+        if (error) throw error;
+    } catch (error) {
+        console.error('Error deleting message for me:', error);
+        throw error;
+    }
+};
+
+/**
+ * Delete message for everyone (only within 5 minutes or by moderator)
+ * @param {string} messageId - ID of the message
+ * @param {string} userId - ID of the user requesting deletion
+ * @param {boolean} isModerator - If true, bypasses time limit
+ * @returns {Promise<Object>} Result indicating success or reason for failure
+ */
+export const deleteForEveryone = async (messageId, userId, isModerator = false) => {
+    try {
+        // Get message details
+        const { data: message, error: fetchError } = await supabase
+            .from('messages')
+            .select('sender_user_id, created_at')
+            .eq('id', messageId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        // Check ownership or moderator status
+        const isOwner = message.sender_user_id === userId;
+
+        if (!isOwner && !isModerator) {
+            return { success: false, reason: 'not_authorized' };
+        }
+
+        // Check 5-minute window for non-moderators
+        if (!isModerator) {
+            const createdAt = new Date(message.created_at).getTime();
+            const now = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+
+            if (now - createdAt > fiveMinutes) {
+                return { success: false, reason: 'time_expired' };
+            }
+        }
+
+        // Soft delete for everyone
+        const { error } = await supabase
+            .from('messages')
+            .update({
+                deleted_at: new Date().toISOString(),
+                deleted_by: userId,
+                content: '[Message deleted]'
+            })
+            .eq('id', messageId);
+
+        if (error) throw error;
+        return { success: true };
+    } catch (error) {
+        console.error('Error deleting message for everyone:', error);
+        throw error;
+    }
+};
+
+/**
+ * Send a message with snapshot reply support
+ * @param {string} conversationId - ID of the conversation
+ * @param {string} userId - ID of the sender
+ * @param {string} content - Message content
+ * @param {Array} files - Optional array of files to attach
+ * @param {string} replyToId - Optional ID of message being replied to
+ * @returns {Promise<Object>} Created message
+ */
+export const sendMessageWithSnapshot = async (conversationId, userId, content, files = [], replyToId = null) => {
+    try {
+        // Build message object
+        const messageData = {
+            conversation_id: conversationId,
+            sender_user_id: userId,
+            sender_type: 'human',
+            message_type: 'chat',
+            content: content,
+            created_at: new Date().toISOString()
+        };
+
+        // Add reply snapshot if replying to a message
+        if (replyToId) {
+            messageData.reply_to_id = replyToId;
+
+            // Fetch original message for snapshot
+            const { data: originalMsg } = await supabase
+                .from('messages')
+                .select(`
+                    content,
+                    sender_user_id,
+                    profiles:sender_user_id(full_name, role)
+                `)
+                .eq('id', replyToId)
+                .single();
+
+            if (originalMsg) {
+                messageData.reply_snapshot_content = originalMsg.content;
+                messageData.reply_snapshot_sender_name = originalMsg.profiles?.full_name || 'User';
+                messageData.reply_snapshot_sender_role = originalMsg.profiles?.role || 'unknown';
+            }
+        }
+
+        // Insert the message
+        const { data: message, error: messageError } = await supabase
+            .from('messages')
+            .insert(messageData)
+            .select()
+            .single();
+
+        if (messageError) throw messageError;
+
+        // Upload attachments if any
+        if (files && files.length > 0) {
+            for (const file of files) {
+                await uploadAttachment(file, conversationId, message.id);
+            }
+        }
+
+        // Update conversation index
+        const indexMessage = content || (files && files.length > 0 ? '📎 Attachment' : '');
+        await updateConversationIndex(conversationId, indexMessage);
+
+        // Create notifications for other participants
+        const { data: members } = await supabase
+            .from('conversation_members')
+            .select('user_id')
+            .eq('conversation_id', conversationId);
+
+        if (members && members.length > 0) {
+            const notifications = members
+                .filter(member => member.user_id !== userId)
+                .map(member => ({
+                    receiver_id: member.user_id,
+                    sender_id: userId,
+                    message: `New message: ${content ? (content.length > 30 ? content.substring(0, 30) + '...' : content) : '📎 Attachment'}`,
+                    type: 'message',
+                    is_read: false,
+                    conversation_id: conversationId
+                }));
+
+            if (notifications.length > 0) {
+                const { error: notifError } = await supabase
+                    .from('notifications')
+                    .insert(notifications);
+
+                if (notifError) console.error('Error creating notifications:', notifError);
+            }
+        }
+
+        return message;
+    } catch (error) {
+        console.error('Error sending message with snapshot:', error);
+        throw error;
+    }
+};
+
+/**
+ * Promote a user to admin in a team conversation
+ * @param {string} conversationId - ID of the conversation
+ * @param {string} targetUserId - User to promote
+ * @param {string} promoterId - User doing the promotion
+ * @returns {Promise<Object>} Updated conversation
+ */
+export const promoteToAdmin = async (conversationId, targetUserId, promoterId) => {
+    try {
+        // Get current admin list
+        const { data: conv, error: fetchError } = await supabase
+            .from('conversations')
+            .select('admin_ids, type')
+            .eq('id', conversationId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        if (conv.type !== 'team') {
+            throw new Error('Can only manage admins in team conversations');
+        }
+
+        const currentAdmins = conv.admin_ids || [];
+
+        // Check if promoter is an admin
+        if (!currentAdmins.includes(promoterId)) {
+            throw new Error('Only admins can promote others');
+        }
+
+        // Add target if not already admin
+        if (!currentAdmins.includes(targetUserId)) {
+            currentAdmins.push(targetUserId);
+        }
+
+        const { data, error } = await supabase
+            .from('conversations')
+            .update({ admin_ids: currentAdmins })
+            .eq('id', conversationId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error('Error promoting to admin:', error);
+        throw error;
+    }
+};
+
+/**
+ * Demote a user from admin in a team conversation
+ * @param {string} conversationId - ID of the conversation
+ * @param {string} targetUserId - User to demote
+ * @param {string} demoterId - User doing the demotion
+ * @returns {Promise<Object>} Updated conversation
+ */
+export const demoteFromAdmin = async (conversationId, targetUserId, demoterId) => {
+    try {
+        const { data: conv, error: fetchError } = await supabase
+            .from('conversations')
+            .select('admin_ids')
+            .eq('id', conversationId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        let currentAdmins = conv.admin_ids || [];
+
+        if (!currentAdmins.includes(demoterId)) {
+            throw new Error('Only admins can demote others');
+        }
+
+        // Prevent demoting self if last admin
+        if (targetUserId === demoterId && currentAdmins.length === 1) {
+            throw new Error('Cannot demote yourself when you are the only admin');
+        }
+
+        currentAdmins = currentAdmins.filter(id => id !== targetUserId);
+
+        const { data, error } = await supabase
+            .from('conversations')
+            .update({ admin_ids: currentAdmins })
+            .eq('id', conversationId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error('Error demoting from admin:', error);
+        throw error;
+    }
+};
+
+/**
+ * Check if a user is an admin of a conversation
+ * @param {string} conversationId - ID of the conversation
+ * @param {string} userId - User to check
+ * @returns {Promise<boolean>}
+ */
+export const isConversationAdmin = async (conversationId, userId) => {
+    try {
+        const { data, error } = await supabase
+            .from('conversations')
+            .select('admin_ids')
+            .eq('id', conversationId)
+            .single();
+
+        if (error) throw error;
+        return data?.admin_ids?.includes(userId) || false;
+    } catch (error) {
+        console.error('Error checking admin status:', error);
+        return false;
+    }
+};
+
+/**
+ * Subscribe to message reactions in real-time
+ * @param {string} conversationId - ID of the conversation
+ * @param {Function} callback - Callback for reaction changes
+ * @returns {Object} Subscription object
+ */
+export const subscribeToReactions = (conversationId, callback) => {
+    const subscription = supabase
+        .channel(`reactions:${conversationId}`)
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'message_reactions'
+            },
+            (payload) => {
+                callback(payload);
+            }
+        )
+        .subscribe();
+
+    return subscription;
+};
+
+/**
+ * Get user's cohort role display name
+ * @param {string} dbRole - Database role (executive, manager, employee)
+ * @returns {string} Display name (Tutor, Mentor, Student)
+ */
+export const getCohortRoleDisplay = (dbRole) => {
+    const roleMap = {
+        'executive': 'Tutor',
+        'manager': 'Mentor',
+        'team_lead': 'Project Mentor',
+        'employee': 'Student'
+    };
+    return roleMap[dbRole] || dbRole;
+};
+
+/**
+ * Check if user has moderation permissions over another user
+ * @param {string} moderatorRole - Role of the moderator
+ * @param {string} targetRole - Role of the target user
+ * @returns {boolean}
+ */
+export const canModerate = (moderatorRole, targetRole) => {
+    const hierarchy = {
+        'executive': 100,
+        'manager': 75,
+        'team_lead': 50,
+        'employee': 25
+    };
+    return (hierarchy[moderatorRole] || 0) > (hierarchy[targetRole] || 0);
+};
+

@@ -36,7 +36,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
         full_name: '',
         email: '',
         password: '',
-        role: 'employee',
+        role: orgName === 'Cohort' ? 'student' : 'employee',
         job_title: '',
         employment_type: 'full_time', // Changed default to lowercase snake_case
         department_id: '', // Added department_id
@@ -46,7 +46,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
         allowances: '',
         joinDate: new Date().toISOString().split('T')[0],
     });
-    const [projectRole, setProjectRole] = useState('employee');
+    const [projectRole, setProjectRole] = useState(orgName === 'Cohort' ? 'student' : 'employee');
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
@@ -54,6 +54,8 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
         if (isOpen) {
             fetchProjects();
             fetchDepartments();
+            setProjectRole(orgName === 'Cohort' ? 'student' : 'employee');
+            setFormData(prev => ({ ...prev, role: orgName === 'Cohort' ? 'student' : 'employee' }));
         }
     }, [isOpen, orgId]);
 
@@ -148,7 +150,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
                 options: {
                     data: {
                         full_name: formData.full_name,
-                        role: formData.role,
+                        role: (formData.role && formData.role.toLowerCase() === 'student') ? 'employee' : formData.role,
                         org_id: orgId
                     }
                 }
@@ -431,7 +433,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
                                     color: 'var(--text-primary)',
                                 }}
                             >
-                                <option value="employee">{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
+                                <option value={orgName === 'Cohort' ? 'student' : 'employee'}>{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
                                 <option value="manager">Mentor</option>
                                 <option value="executive">Tutor</option>
                             </select>
@@ -541,7 +543,7 @@ export const AddEmployeeModal: React.FC<AddEmployeeModalProps> = ({ isOpen, onCl
                                     color: 'var(--text-primary)',
                                 }}
                             >
-                                <option value="employee">{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
+                                <option value={orgName === 'Cohort' ? 'student' : 'employee'}>{orgName === 'Cohort' ? 'Student' : 'Employee'}</option>
                                 <option value="team_lead">Team Lead</option>
                                 <option value="manager">Mentor</option>
                             </select>
